@@ -31,9 +31,30 @@
 
 
 int define_socket_TCP(int port) {
-   // Aquí deberá incluir el código para definir el socket.
-  
-   return -1;
+  // Aquí deberá incluir el código para definir el socket.
+  struct sockaddr_in sin;
+    int s;
+ 
+    s = socket (AF_INET, SOCK_STREAM, 0); //Socket TCP
+ 
+    if (s < 0) {
+        errexit ("No puedo crear el socket: %s\n", strerror(errno));
+    }
+ 
+    memset (&sin, 0, sizeof (sin));
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = INADDR_ANY;
+    sin.sin_port = htons (port);
+   
+    if ( bind(s, (struct sockaddr*)&sin, sizeof(sin)) < 0 ){
+        errexit ("No puedo hacer el bind con el puerto: %s\n", strerror(errno));
+    }
+    if ( listen (s, 1) < 0)
+        errexit ("Error en el listen: %s\n", strerror(errno));
+   
+    return s;
+    //RESUMEN: socket(), inicializar sockaddr_in, bind(), listen()
+//   return -1;
 }
 
 // Esta es la función que se ejecuta al
@@ -68,6 +89,7 @@ void FTPServer::run() {
     int ssock;
     socklen_t alen;
     msock = define_socket_TCP(port);  // Esta función deberá implementarla el alumno.
+    alen=sizeof(fsin);
     while (1) {
 	pthread_t thread;
         ssock = accept(msock, (struct sockaddr *)&fsin, &alen);
